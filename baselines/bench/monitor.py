@@ -57,7 +57,9 @@ class Monitor(Wrapper):
 
     def update(self, ob, rew, done, info):
         self.rewards.append(rew)
-        if len(done) > 1:
+        if isinstance(done, bool):
+            _done = done
+        elif len(done) > 1:
             _done = done.all()
         else:
             _done = done

@@ -125,7 +125,9 @@ def _subproc_worker(pipe, parent_pipe, env_fn_wrapper, obs_bufs, obs_shapes, obs
                 pipe.send(_write_obs(env.reset()))
             elif cmd == 'step':
                 obs, reward, done, info = env.step(data)
-                if len(done) > 1:
+                if isinstance(done, bool):
+                    _done = done
+                elif len(done) > 1:
                     _done = done.all()
                 else:
                     _done = done
@@ -139,6 +141,8 @@ def _subproc_worker(pipe, parent_pipe, env_fn_wrapper, obs_bufs, obs_shapes, obs
                 break
             else:
                 raise RuntimeError('Got unrecognized cmd %s' % cmd)
+    except EOFError:
+        print('ShmemVecEnv worker: EOF exit')
     except KeyboardInterrupt:
         print('ShmemVecEnv worker: got KeyboardInterrupt')
     finally:
